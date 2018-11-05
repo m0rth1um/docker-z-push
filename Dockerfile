@@ -15,8 +15,6 @@ RUN apk update && \
 	chmod 770 /var/log/z-push/ /var/lib/z-push/ && \
 	chown -R nginx:nobody z-push/ /var/log/z-push/ /var/lib/z-push/ && \
 	echo "daemon off;" >> /etc/nginx/nginx.conf && \
-	mkdir -p /config && \
-	find z-push/ -name 'config.php' -exec cp -s --parents {} /config/. \; && \
 	chmod +x start-z-push.sh
 
 ADD default.conf /etc/nginx/conf.d/
