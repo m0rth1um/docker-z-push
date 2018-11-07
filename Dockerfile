@@ -1,23 +1,40 @@
-FROM nginx:alpine
+FROM nginx:latest
 MAINTAINER Edwin Donderwinkel
 
-WORKDIR /usr/share/nginx
-ADD start-z-push.sh .
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apk update && \
-	apk add php5 php5-imap php5-fpm php5-posix php5-pdo && \
-	rm -rf /var/cache/apk/* && \
-	wget http://download.z-push.org/final/2.3/z-push-2.3.9.tar.gz -O z-push.tar.gz && \
-	tar xzf z-push.tar.gz && \
-	mv z-push-* z-push && \
-	rm z-push.tar.gz && \
-	mkdir -p /var/log/z-push/ /var/lib/z-push/ && \
-	chmod 770 /var/log/z-push/ /var/lib/z-push/ && \
-	chown -R nginx:nobody z-push/ /var/log/z-push/ /var/lib/z-push/ && \
+RUN apt-get update && apt-get install -y gnupg
+
+ADD http://repo.z-hub.io/z-push:/final/Debian_9.0/Release.key /tmp/z-push-release-key
+
+RUN apt-key add /tmp/z-push-release-key && \
+	rm /tmp/z-push-release-key && \
+	echo "deb http://repo.z-hub.io/z-push:/final/Debian_9.0/ /" >> /etc/apt/sources.list.d/z-push.list 
+
+ADD start-z-push.sh /usr/local/bin/start-z-push.sh
+
+RUN mkdir -p /var/log/z-push/ && \
+	chmod -R 770 /var/log/z-push/ && \
+	chown -R www-data:www-data /var/log/z-push/
+
+RUN apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y --no-install-recommends \
+	php-mbstring \
+	php-curl \
+	php-fpm \
+	z-push-common \
+	z-push-backend-imap \
+	z-push-backend-carddav \
+	z-push-backend-caldav \
+	z-push-backend-combined \
+	z-push-ipc-sharedmemory && \
+	apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* && \
 	echo "daemon off;" >> /etc/nginx/nginx.conf && \
-	chmod +x start-z-push.sh
+	chmod +x /usr/local/bin/start-z-push.sh
+
 
 ADD default.conf /etc/nginx/conf.d/
-ADD php-fpm.conf /etc/php5/
+ADD php-fpm.conf /etc/php/7.0/fpm
 
-CMD "./start-z-push.sh"
+CMD "/usr/local/bin/start-z-push.sh"
