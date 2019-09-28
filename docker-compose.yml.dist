@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  z-push:
+    container_name: z-push
+    build:
+      context: .
+    volumes:
+      - ./config/:/config/
+

@@ -9,5 +9,5 @@ cp -rv /config/* /usr/share/z-push/.
 
 chown -R www-data:www-data /var/lib/z-push
 
-php-fpm7.0
+php-fpm7.3
 nginx

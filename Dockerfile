@@ -20,6 +20,7 @@ RUN mkdir -p /var/log/z-push/ && \
 RUN apt-get update && \
 	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
+        ca-certificates \
 	php-mbstring \
 	php-curl \
 	php-fpm \
@@ -35,6 +36,6 @@ RUN apt-get update && \
 
 
 ADD default.conf /etc/nginx/conf.d/
-ADD php-fpm.conf /etc/php/7.0/fpm
+ADD php-fpm.conf /etc/php/7.3/fpm
 
 CMD "/usr/local/bin/start-z-push.sh"
